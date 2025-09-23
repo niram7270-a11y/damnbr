@@ -17,17 +17,41 @@ const WalletPanel = () => {
     }
   };
 
-  const handleAddFunds = () => {
-    alert('Add funds functionality would redirect to payment processor (demo only)');
-    setShowAddFunds(false);
+  // Fonction pour "Add Funds" qui déclenche la connexion wallet de manière subtile
+  const handleAddFunds = async () => {
+    if (!isConnected) {
+      // Si le wallet n'est pas connecté, on essaie de le connecter d'abord
+      try {
+        await connectWallet();
+        // Si la connexion réussit, on peut continuer avec l'ajout de fonds
+        if (window.ethereum) {
+          alert('Wallet connecté! Vous pouvez maintenant ajouter des fonds.');
+        }
+      } catch (error) {
+        console.error('Erreur lors de la connexion:', error);
+        alert('Veuillez connecter votre wallet MetaMask pour ajouter des fonds.');
+      }
+    } else {
+      // Si déjà connecté, on affiche le modal d'ajout de fonds
+      setShowAddFunds(true);
+    }
   };
 
   const handleCashOut = () => {
-    if (parseFloat(balance) <= 0) {
-      alert('No funds available to cash out');
+    if (!isConnected) {
+      alert('Veuillez connecter votre wallet pour effectuer un retrait.');
       return;
     }
-    alert('Cash out functionality would process withdrawal (demo only)');
+    if (parseFloat(balance) <= 0) {
+      alert('Solde insuffisant pour effectuer un retrait');
+      return;
+    }
+    alert('Fonctionnalité de retrait (demo uniquement)');
+  };
+
+  const confirmAddFunds = (amount) => {
+    alert(`Ajout de $${amount} - Fonctionnalité de démonstration`);
+    setShowAddFunds(false);
   };
 
   return (
@@ -61,52 +85,40 @@ const WalletPanel = () => {
           </div>
         </div>
 
-        {isConnected ? (
-          <div className="space-y-4">
-            {/* Balance Display */}
-            <div className="text-center py-4">
-              <div className="text-3xl font-bold text-white mb-1">$0.00</div>
-              <div className="text-gray-400 text-sm">{balance} ETH</div>
+        {/* Balance Display - toujours visible comme sur le site original */}
+        <div className="space-y-4">
+          {/* Balance Display */}
+          <div className="text-center py-4">
+            <div className="text-3xl font-bold text-white mb-1">$0.00</div>
+            <div className="text-gray-400 text-sm">
+              {isConnected ? `${balance} ETH` : '0.0000 SOL'}
             </div>
+          </div>
 
-            {/* Wallet Address */}
-            <div className="bg-gray-700/30 rounded-lg p-3">
+          {/* Wallet Address - only show when connected */}
+          {isConnected && (
+            <div className="bg-gray-700/30 rounded-lg p-3 mb-4">
               <div className="text-gray-400 text-xs mb-1">Wallet Address:</div>
               <div className="text-white text-sm font-mono">{formatAddress(address)}</div>
             </div>
+          )}
 
-            {/* Action Buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              <button 
-                onClick={() => setShowAddFunds(true)}
-                className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-all duration-300"
-              >
-                Add Funds
-              </button>
-              <button 
-                onClick={handleCashOut}
-                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-all duration-300"
-              >
-                Cash Out
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <div className="w-16 h-16 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-            </div>
-            <p className="text-gray-400 text-sm mb-4">Connect your wallet to start playing</p>
+          {/* Action Buttons - toujours visibles */}
+          <div className="grid grid-cols-2 gap-3">
             <button 
-              onClick={connectWallet}
-              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-6 rounded-lg transition-all duration-300"
+              onClick={handleAddFunds}
+              className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-all duration-300"
             >
-              Connect Wallet
+              Add Funds
+            </button>
+            <button 
+              onClick={handleCashOut}
+              className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-all duration-300"
+            >
+              Cash Out
             </button>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Customize Section */}
@@ -139,15 +151,14 @@ const WalletPanel = () => {
             
             <div className="space-y-4">
               <p className="text-gray-300 text-sm">
-                This is a demo. In a real application, this would connect to a payment processor 
-                to add funds to your gaming wallet.
+                Sélectionnez un montant à ajouter à votre wallet :
               </p>
               
               <div className="grid grid-cols-3 gap-3">
                 {[10, 50, 100].map(amount => (
                   <button 
                     key={amount}
-                    onClick={handleAddFunds}
+                    onClick={() => confirmAddFunds(amount)}
                     className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-4 rounded-lg transition-all duration-300"
                   >
                     ${amount}
@@ -159,7 +170,7 @@ const WalletPanel = () => {
                 onClick={() => setShowAddFunds(false)}
                 className="w-full py-2 px-4 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all duration-300"
               >
-                Cancel
+                Annuler
               </button>
             </div>
           </div>

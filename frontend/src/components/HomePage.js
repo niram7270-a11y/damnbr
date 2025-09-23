@@ -13,11 +13,17 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 relative overflow-hidden">
-      {/* Animated background blobs */}
+      {/* Animated background blobs - matching original design */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full opacity-20 blur-3xl animate-float"></div>
-        <div className="absolute top-1/2 -right-40 w-96 h-96 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full opacity-15 blur-3xl animate-float-delayed"></div>
-        <div className="absolute -bottom-40 left-1/3 w-72 h-72 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full opacity-10 blur-3xl animate-float-slow"></div>
+        {/* Orange/Red blob (left side) */}
+        <div className="absolute top-1/3 left-12 w-40 h-80 bg-gradient-to-br from-orange-500 via-red-500 to-orange-600 rounded-full opacity-70 blur-xl animate-float transform rotate-45"></div>
+        
+        {/* Blue blob (right side) */}
+        <div className="absolute top-1/2 right-16 w-32 h-64 bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 rounded-full opacity-60 blur-xl animate-float-delayed transform -rotate-12"></div>
+        
+        {/* Additional teal accents */}
+        <div className="absolute -top-20 -left-20 w-60 h-60 bg-gradient-to-r from-cyan-500/20 to-teal-500/20 rounded-full blur-3xl animate-float-slow"></div>
+        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-gradient-to-r from-blue-500/15 to-purple-500/15 rounded-full blur-3xl animate-float"></div>
       </div>
 
       {/* Header */}

@@ -428,6 +428,7 @@ test_plan:
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
+  latest_test_focus: "New subtle wallet connection logic verification completed successfully"
 
 agent_communication:
   - agent: "testing"

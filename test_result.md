@@ -315,7 +315,65 @@ frontend:
         agent: "testing"
         comment: "✅ PASSED: Manage Affiliate button is prominently displayed with checkmark icon and gradient styling. Button is clickable and positioned correctly in the game area."
 
-  - task: "Change Appearance Button"
+  - task: "New Subtle Wallet Connection Logic"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/WalletPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test new wallet connection logic where Add Funds triggers connection automatically, no visible Connect Wallet button, and wallet shows balance even without connection"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED: New subtle wallet connection logic works perfectly. Add Funds button automatically triggers wallet connection when not connected (confirmed with MetaMask alert). No Connect Wallet button visible in interface. Wallet panel correctly shows $0.00 and 0.0000 SOL even without connection. This provides a more natural user experience matching the original DamnBruh site."
+
+  - task: "Visual Interface with Colored Blobs Background"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/HomePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to verify the background with colored blobs (orange/red and blue) matches the original site design"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED: Visual interface perfectly matches original design with animated background blobs. Orange/red blob on left side and blue blob on right side are present with proper gradients and animations. The overall aesthetic closely resembles the original DamnBruh site."
+
+  - task: "Header Login Button Simplicity"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/Header.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to verify Header Login button remains simple and doesn't interact with wallet functionality"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED: Header Login button is simple and separate from wallet functionality. Button has correct yellow styling (rgb(234, 179, 8)) and doesn't trigger wallet connection. Maintains clean separation between login and wallet features."
+
+  - task: "Cash Out Appropriate Messaging"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/WalletPanel.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test Cash Out button provides appropriate message when wallet not connected"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED: Cash Out button provides appropriate messaging when wallet is not connected. Button is functional and gives proper feedback to users about wallet connection requirements."
     implemented: true
     working: true
     file: "/app/frontend/src/components/WalletPanel.js"

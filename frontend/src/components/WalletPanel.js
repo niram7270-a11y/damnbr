@@ -28,28 +28,29 @@ const WalletPanel = () => {
     }
   };
 
-  // Fonction améliorée pour "Add Funds" qui détecte et connecte automatiquement le wallet
+  // Fonction améliorée pour "Add Funds" avec détection correcte des wallets
   const handleAddFunds = async () => {
     if (!isConnected) {
       try {
-        // Vérifier si des wallets sont disponibles
-        const hasMetaMask = typeof window.ethereum !== 'undefined';
-        const hasCoinbase = typeof window.coinbaseWalletExtension !== 'undefined';
+        // Détection correcte des wallets disponibles
+        const hasMetaMask = typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask;
+        const hasCoinbase = typeof window.ethereum !== 'undefined' && (window.ethereum.isCoinbaseWallet || window.ethereum.selectedProvider?.isCoinbaseWallet);
+        const hasAnyWallet = typeof window.ethereum !== 'undefined';
         
-        if (!hasMetaMask && !hasCoinbase) {
-          alert('Aucun wallet crypto détecté. Veuillez installer MetaMask, Coinbase Wallet ou un autre wallet compatible.');
+        console.log('Wallet detection:', { hasMetaMask, hasCoinbase, hasAnyWallet });
+        
+        if (!hasAnyWallet) {
+          alert('Aucun wallet crypto détecté. Veuillez installer MetaMask, Coinbase Wallet ou un autre wallet compatible Web3.');
+          window.open('https://metamask.io/download/', '_blank');
           return;
         }
 
+        console.log('Tentative de connexion au wallet...');
+        
         // Connexion automatique au wallet détecté
         await connectWallet();
         
-        // Si la connexion réussit, ouvrir directement le modal Add Funds
-        setTimeout(() => {
-          if (isConnected) {
-            setShowAddFunds(true);
-          }
-        }, 500);
+        console.log('Connexion réussie, isConnected:', isConnected);
         
       } catch (error) {
         console.error('Erreur lors de la connexion automatique:', error);
@@ -60,7 +61,7 @@ const WalletPanel = () => {
         } else if (error.message?.includes('No provider')) {
           alert('Wallet non détecté. Assurez-vous qu\'un wallet crypto est installé et débloqué.');
         } else {
-          alert('Impossible de se connecter au wallet. Vérifiez que votre wallet est débloqué et réessayez.');
+          alert(`Impossible de se connecter au wallet: ${error.message}`);
         }
       }
     } else {

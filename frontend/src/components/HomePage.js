@@ -32,8 +32,8 @@ const HomePage = () => {
           Your browser does not support the video tag.
         </video>
         
-        {/* Overlay sombre pour améliorer la lisibilité */}
-        <div className="absolute inset-0 bg-black/60"></div>
+        {/* Overlay sombre optimisé pour la vidéo Snake hexagonal */}
+        <div className="absolute inset-0 bg-black/50"></div>
       </div>
 
       {/* Header */}

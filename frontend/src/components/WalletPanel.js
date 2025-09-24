@@ -28,15 +28,43 @@ const WalletPanel = () => {
     }
   };
 
-  // Fonction pour "Add Funds" qui déclenche la connexion wallet multi-plateforme
+  // Fonction améliorée pour "Add Funds" qui détecte et connecte automatiquement le wallet
   const handleAddFunds = async () => {
     if (!isConnected) {
       try {
+        // Vérifier si des wallets sont disponibles
+        const hasMetaMask = typeof window.ethereum !== 'undefined';
+        const hasCoinbase = typeof window.coinbaseWalletExtension !== 'undefined';
+        
+        if (!hasMetaMask && !hasCoinbase) {
+          alert('Aucun wallet crypto détecté. Veuillez installer MetaMask, Coinbase Wallet ou un autre wallet compatible.');
+          return;
+        }
+
+        // Connexion automatique au wallet détecté
         await connectWallet();
+        
+        // Si la connexion réussit, ouvrir directement le modal Add Funds
+        setTimeout(() => {
+          if (isConnected) {
+            setShowAddFunds(true);
+          }
+        }, 500);
+        
       } catch (error) {
-        console.error('Erreur lors de la connexion:', error);
+        console.error('Erreur lors de la connexion automatique:', error);
+        
+        // Messages d'erreur plus spécifiques
+        if (error.message?.includes('User rejected') || error.message?.includes('User denied')) {
+          alert('Connexion refusée. Veuillez accepter la connexion dans votre wallet pour continuer.');
+        } else if (error.message?.includes('No provider')) {
+          alert('Wallet non détecté. Assurez-vous qu\'un wallet crypto est installé et débloqué.');
+        } else {
+          alert('Impossible de se connecter au wallet. Vérifiez que votre wallet est débloqué et réessayez.');
+        }
       }
     } else {
+      // Si déjà connecté, ouvrir directement le modal
       setShowAddFunds(true);
     }
   };

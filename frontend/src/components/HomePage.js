@@ -3,7 +3,6 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import GameArea from './GameArea';
 import WalletPanel from './WalletPanel';
-import SlitherBackground from './SlitherBackground';
 import { mockData } from '../data/mockData';
 
 const HomePage = () => {
@@ -14,11 +13,30 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Animation de fond Slither.io */}
-      <SlitherBackground />
-
-      {/* Overlay gradient pour améliorer la lisibilité */}
-      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-transparent to-black/40 pointer-events-none z-5"></div>
+      {/* Arrière-plan identique à DamnBruh.com */}
+      <div className="fixed inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        {/* Forme orange/rouge courbée à gauche (comme sur l'original) */}
+        <div 
+          className="absolute left-8 top-1/3 w-32 h-80 opacity-70"
+          style={{
+            background: 'linear-gradient(135deg, #ff6b4a 0%, #ff8f4a 50%, #ff4757 100%)',
+            borderRadius: '50px',
+            transform: 'rotate(-15deg)',
+            filter: 'blur(1px)'
+          }}
+        ></div>
+        
+        {/* Forme teal/cyan courbée à droite (comme sur l'original) */}
+        <div 
+          className="absolute right-12 top-1/2 w-28 h-64 opacity-60"
+          style={{
+            background: 'linear-gradient(135deg, #00d2d3 0%, #54a0ff 50%, #5f27cd 100%)',
+            borderRadius: '40px',
+            transform: 'rotate(25deg)',
+            filter: 'blur(0.5px)'
+          }}
+        ></div>
+      </div>
 
       {/* Header */}
       <div className="relative z-20">

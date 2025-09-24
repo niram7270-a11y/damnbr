@@ -68,12 +68,73 @@ export const MultiWalletProvider = ({ children }) => {
     setIsConnecting(true);
     
     try {
-      // Tentative de connexion automatique au wallet préféré
+      // Méthode 1: Essayer la connexion directe avec MetaMask d'abord
+      if (typeof window.ethereum !== 'undefined' && window.ethereum.isMetaMask) {
+        console.log('Connexion directe MetaMask détectée');
+        
+        const { ethers } = await import('ethers');
+        
+        // Demander la connexion à MetaMask
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        
+        if (accounts.length > 0) {
+          const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+          setWeb3(web3Provider);
+          setProvider(window.ethereum);
+          
+          const address = accounts[0];
+          setAddress(address);
+          setIsConnected(true);
+          
+          // Récupérer le solde
+          try {
+            const balance = await web3Provider.getBalance(address);
+            const balanceInEth = ethers.utils.formatEther(balance);
+            setBalance(parseFloat(balanceInEth).toFixed(4));
+          } catch (balanceError) {
+            console.warn('Could not fetch balance:', balanceError);
+            setBalance('0.0000');
+          }
+          
+          // Récupérer le chainId
+          try {
+            const network = await web3Provider.getNetwork();
+            setChainId(network.chainId);
+          } catch (networkError) {
+            console.warn('Could not fetch network:', networkError);
+          }
+
+          console.log('✅ MetaMask connecté avec succès:', address);
+          
+          // Écouter les changements
+          window.ethereum.on('accountsChanged', (accounts) => {
+            if (accounts.length === 0) {
+              disconnectWallet();
+            } else {
+              setAddress(accounts[0]);
+              refreshBalance();
+            }
+          });
+
+          window.ethereum.on('chainChanged', (chainId) => {
+            setChainId(parseInt(chainId, 16));
+          });
+
+          return;
+        }
+      }
+
+      // Méthode 2: Fallback vers Web3Modal si MetaMask direct ne fonctionne pas
+      if (!web3Modal) {
+        throw new Error('Web3Modal not initialized');
+      }
+
+      console.log('Fallback vers Web3Modal');
       const provider = await web3Modal.connect();
       setProvider(provider);
 
       // Initialiser Web3 avec ethers
-      if (window.ethereum || provider) {
+      if (provider) {
         const { ethers } = await import('ethers');
         const web3Provider = new ethers.providers.Web3Provider(provider);
         setWeb3(web3Provider);
@@ -102,30 +163,29 @@ export const MultiWalletProvider = ({ children }) => {
             console.warn('Could not fetch network:', networkError);
           }
 
-          // Succès de connexion
-          console.log('✅ Wallet connecté avec succès:', address);
+          console.log('✅ Wallet connecté via Web3Modal:', address);
         }
       }
 
-      // Écouter les changements de compte
-      provider.on('accountsChanged', (accounts) => {
-        if (accounts.length === 0) {
+      // Écouter les changements de compte pour Web3Modal
+      if (provider) {
+        provider.on('accountsChanged', (accounts) => {
+          if (accounts.length === 0) {
+            disconnectWallet();
+          } else {
+            setAddress(accounts[0]);
+            refreshBalance();
+          }
+        });
+
+        provider.on('chainChanged', (chainId) => {
+          setChainId(parseInt(chainId, 16));
+        });
+
+        provider.on('disconnect', () => {
           disconnectWallet();
-        } else {
-          setAddress(accounts[0]);
-          refreshBalance();
-        }
-      });
-
-      // Écouter les changements de réseau
-      provider.on('chainChanged', (chainId) => {
-        setChainId(parseInt(chainId, 16));
-      });
-
-      // Écouter les déconnexions
-      provider.on('disconnect', () => {
-        disconnectWallet();
-      });
+        });
+      }
 
     } catch (error) {
       console.error('Failed to connect wallet:', error);
@@ -133,13 +193,15 @@ export const MultiWalletProvider = ({ children }) => {
       // Messages d'erreur plus spécifiques et utiles
       if (error.message?.includes('User rejected') || error.message?.includes('User denied')) {
         throw new Error('User rejected');
+      } else if (error.code === 4001) {
+        throw new Error('User rejected');
       } else if (error.message?.includes('No Ethereum provider') || error.message?.includes('No provider')) {
         throw new Error('No provider');
       } else if (error.message?.includes('Modal closed by user')) {
         throw new Error('User rejected');
       } else {
         console.error('Erreur de connexion détaillée:', error);
-        throw new Error('Connection failed');
+        throw new Error('Connection failed: ' + error.message);
       }
     } finally {
       setIsConnecting(false);

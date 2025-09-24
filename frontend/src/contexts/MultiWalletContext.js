@@ -61,18 +61,19 @@ export const MultiWalletProvider = ({ children }) => {
 
   const connectWallet = async () => {
     if (!web3Modal) {
-      alert('Web3Modal not initialized yet. Please try again.');
+      alert('Initialisation en cours... Veuillez patienter quelques secondes.');
       return;
     }
 
     setIsConnecting(true);
     
     try {
+      // Tentative de connexion automatique au wallet préféré
       const provider = await web3Modal.connect();
       setProvider(provider);
 
       // Initialiser Web3 avec ethers
-      if (window.ethereum) {
+      if (window.ethereum || provider) {
         const { ethers } = await import('ethers');
         const web3Provider = new ethers.providers.Web3Provider(provider);
         setWeb3(web3Provider);
@@ -84,13 +85,25 @@ export const MultiWalletProvider = ({ children }) => {
           setIsConnected(true);
           
           // Récupérer le solde
-          const balance = await web3Provider.getBalance(address);
-          const balanceInEth = ethers.utils.formatEther(balance);
-          setBalance(parseFloat(balanceInEth).toFixed(4));
+          try {
+            const balance = await web3Provider.getBalance(address);
+            const balanceInEth = ethers.utils.formatEther(balance);
+            setBalance(parseFloat(balanceInEth).toFixed(4));
+          } catch (balanceError) {
+            console.warn('Could not fetch balance:', balanceError);
+            setBalance('0.0000');
+          }
           
           // Récupérer le chainId
-          const network = await web3Provider.getNetwork();
-          setChainId(network.chainId);
+          try {
+            const network = await web3Provider.getNetwork();
+            setChainId(network.chainId);
+          } catch (networkError) {
+            console.warn('Could not fetch network:', networkError);
+          }
+
+          // Succès de connexion
+          console.log('✅ Wallet connecté avec succès:', address);
         }
       }
 
@@ -117,13 +130,16 @@ export const MultiWalletProvider = ({ children }) => {
     } catch (error) {
       console.error('Failed to connect wallet:', error);
       
-      // Messages d'erreur spécifiques
-      if (error.message.includes('User rejected')) {
-        alert('Connexion annulée par l\'utilisateur.');
-      } else if (error.message.includes('No Ethereum provider')) {
-        alert('Aucun wallet crypto détecté. Veuillez installer MetaMask ou un autre wallet.');
+      // Messages d'erreur plus spécifiques et utiles
+      if (error.message?.includes('User rejected') || error.message?.includes('User denied')) {
+        throw new Error('User rejected');
+      } else if (error.message?.includes('No Ethereum provider') || error.message?.includes('No provider')) {
+        throw new Error('No provider');
+      } else if (error.message?.includes('Modal closed by user')) {
+        throw new Error('User rejected');
       } else {
-        alert('Erreur lors de la connexion au wallet. Veuillez réessayer.');
+        console.error('Erreur de connexion détaillée:', error);
+        throw new Error('Connection failed');
       }
     } finally {
       setIsConnecting(false);

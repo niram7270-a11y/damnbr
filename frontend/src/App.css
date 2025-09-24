@@ -4,50 +4,11 @@
   min-height: 100vh;
 }
 
-/* Custom animations for background blobs */
-@keyframes float {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-  33% {
-    transform: translate3d(20px, -25px, 0) rotate(2deg);
-  }
-  66% {
-    transform: translate3d(-15px, 15px, 0) rotate(-2deg);
-  }
-}
-
-@keyframes float-delayed {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-  25% {
-    transform: translate3d(-30px, 20px, 0) rotate(-1deg);
-  }
-  75% {
-    transform: translate3d(25px, -30px, 0) rotate(1deg);
-  }
-}
-
-@keyframes float-slow {
-  0%, 100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-  50% {
-    transform: translate3d(-20px, -30px, 0) rotate(0.5deg);
-  }
-}
-
-.animate-float {
-  animation: float 15s infinite ease-in-out;
-}
-
-.animate-float-delayed {
-  animation: float-delayed 18s infinite ease-in-out;
-}
-
-.animate-float-slow {
-  animation: float-slow 22s infinite ease-in-out;
+/* Optimisations pour l'animation Slither */
+canvas {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: pixelated;
 }
 
 /* Discord blue color */
@@ -87,7 +48,11 @@ button:active {
   background: rgba(255, 255, 255, 0.5);
 }
 
-/* Glass morphism effect */
+/* Glass morphism effect enhanced */
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+}
+
 .backdrop-blur-sm {
   backdrop-filter: blur(8px);
 }
@@ -104,17 +69,55 @@ button:focus {
   outline: none;
 }
 
-/* Hover effects for cards */
-.bg-gray-800\/50:hover {
-  background-color: rgba(31, 41, 55, 0.7);
-  border-color: rgba(75, 85, 99, 0.8);
+/* Enhanced hover effects for cards */
+.bg-gray-800\/60:hover {
+  background-color: rgba(31, 41, 55, 0.8);
+  border-color: rgba(75, 85, 99, 0.9);
 }
 
-/* Enhanced blob effects for more realistic look */
-.animate-float {
-  filter: blur(2px);
+/* Loading animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.animate-float-delayed {
-  filter: blur(3px);
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Pulse animation for connection status */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Shadow effects for enhanced depth */
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Glow effects for better visual feedback */
+button:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.bg-green-600:hover {
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.bg-blue-600:hover {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.bg-yellow-500:hover {
+  box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
 }

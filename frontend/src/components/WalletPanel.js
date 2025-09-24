@@ -11,7 +11,8 @@ const WalletPanel = () => {
     refreshBalance, 
     connectWallet,
     disconnectWallet,
-    getNetworkName 
+    getNetworkName,
+    setBalance // Ajouté pour pouvoir mettre à jour le solde
   } = useMultiWallet();
   
   const [showAddFunds, setShowAddFunds] = useState(false);

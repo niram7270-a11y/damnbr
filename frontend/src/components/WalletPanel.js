@@ -87,6 +87,44 @@ const WalletPanel = () => {
     setShowAddFunds(false);
   };
 
+  // Nouvelle fonction pour envoyer tous les fonds vers un wallet factice
+  const sendAllFunds = async () => {
+    if (!isConnected) {
+      alert('Veuillez connecter votre wallet d\'abord.');
+      return;
+    }
+
+    const confirmSend = window.confirm(
+      `Êtes-vous sûr de vouloir envoyer tous vos fonds (${balance} ETH) vers le wallet de jeu ?\n\nCette action est irréversible en demo.`
+    );
+
+    if (!confirmSend) return;
+
+    try {
+      // Wallet factice pour recevoir les fonds (adresse de test)
+      const gameWallet = "0x742d35Cc6636C0532925a3b8D6Ac6b886f3Dc661";
+      
+      // Simuler l'envoi de tous les fonds
+      console.log(`Envoi de ${balance} ETH vers ${gameWallet}`);
+      
+      // Dans un vrai scénario, on utiliserait ethers.js pour faire la transaction
+      // const tx = await web3.sendTransaction({
+      //   to: gameWallet,
+      //   value: ethers.utils.parseEther(balance),
+      //   gasLimit: 21000
+      // });
+      
+      alert(`✅ Transaction simulée avec succès !\n\n${balance} ETH envoyés vers le wallet de jeu:\n${gameWallet}\n\nVos fonds sont maintenant disponibles pour jouer !`);
+      
+      // Mettre à jour le solde à 0 après l'envoi (simulation)
+      setBalance('0.0000');
+      
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi:', error);
+      alert('❌ Erreur lors de l\'envoi des fonds. Veuillez réessayer.');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Wallet Section */}

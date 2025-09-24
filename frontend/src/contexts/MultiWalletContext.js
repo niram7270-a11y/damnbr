@@ -199,7 +199,8 @@ export const MultiWalletProvider = ({ children }) => {
       connectWallet,
       disconnectWallet,
       refreshBalance,
-      getNetworkName
+      getNetworkName,
+      setBalance // Exposer setBalance pour permettre la mise à jour du solde
     }}>
       {children}
     </MultiWalletContext.Provider>

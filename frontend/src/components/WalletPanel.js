@@ -1,8 +1,19 @@
 import React, { useState } from 'react';
-import { useWallet } from '../contexts/WalletContext';
+import { useMultiWallet } from '../contexts/MultiWalletContext';
 
 const WalletPanel = () => {
-  const { isConnected, address, balance, refreshBalance, connectWallet } = useWallet();
+  const { 
+    isConnected, 
+    isConnecting,
+    address, 
+    balance, 
+    chainId,
+    refreshBalance, 
+    connectWallet,
+    disconnectWallet,
+    getNetworkName 
+  } = useMultiWallet();
+  
   const [showAddFunds, setShowAddFunds] = useState(false);
 
   const formatAddress = (addr) => {
@@ -13,26 +24,19 @@ const WalletPanel = () => {
   const copyAddress = () => {
     if (address) {
       navigator.clipboard.writeText(address);
-      alert('Address copied to clipboard!');
+      alert('Adresse copiée dans le presse-papier !');
     }
   };
 
-  // Fonction pour "Add Funds" qui déclenche la connexion wallet de manière subtile
+  // Fonction pour "Add Funds" qui déclenche la connexion wallet multi-plateforme
   const handleAddFunds = async () => {
     if (!isConnected) {
-      // Si le wallet n'est pas connecté, on essaie de le connecter d'abord
       try {
         await connectWallet();
-        // Si la connexion réussit, on peut continuer avec l'ajout de fonds
-        if (window.ethereum) {
-          alert('Wallet connecté! Vous pouvez maintenant ajouter des fonds.');
-        }
       } catch (error) {
         console.error('Erreur lors de la connexion:', error);
-        alert('Veuillez connecter votre wallet MetaMask pour ajouter des fonds.');
       }
     } else {
-      // Si déjà connecté, on affiche le modal d'ajout de fonds
       setShowAddFunds(true);
     }
   };
@@ -57,11 +61,16 @@ const WalletPanel = () => {
   return (
     <div className="space-y-6">
       {/* Wallet Section */}
-      <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4 backdrop-blur-sm">
+      <div className="bg-gray-800/60 border border-gray-700/80 rounded-xl p-4 backdrop-blur-md shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <div className="w-5 h-5 text-green-500">💰</div>
             <h3 className="text-white font-semibold">Wallet</h3>
+            {isConnected && chainId && (
+              <span className="text-xs px-2 py-1 bg-green-600/20 text-green-400 rounded-full">
+                {getNetworkName(chainId)}
+              </span>
+            )}
           </div>
           <div className="flex items-center space-x-2">
             {isConnected && (
@@ -80,12 +89,20 @@ const WalletPanel = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                   </svg>
                 </button>
+                <button 
+                  onClick={disconnectWallet}
+                  className="text-red-400 hover:text-red-300 transition-colors"
+                  title="Disconnect Wallet"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                  </svg>
+                </button>
               </>
             )}
           </div>
         </div>
 
-        {/* Balance Display - toujours visible comme sur le site original */}
         <div className="space-y-4">
           {/* Balance Display */}
           <div className="text-center py-4">
@@ -97,19 +114,40 @@ const WalletPanel = () => {
 
           {/* Wallet Address - only show when connected */}
           {isConnected && (
-            <div className="bg-gray-700/30 rounded-lg p-3 mb-4">
+            <div className="bg-gray-700/40 rounded-lg p-3 mb-4">
               <div className="text-gray-400 text-xs mb-1">Wallet Address:</div>
               <div className="text-white text-sm font-mono">{formatAddress(address)}</div>
             </div>
           )}
 
-          {/* Action Buttons - toujours visibles */}
+          {/* Connection Status */}
+          {isConnecting && (
+            <div className="text-center py-2">
+              <div className="text-yellow-500 text-sm flex items-center justify-center space-x-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-500"></div>
+                <span>Connexion en cours...</span>
+              </div>
+            </div>
+          )}
+
+          {/* Action Buttons */}
           <div className="grid grid-cols-2 gap-3">
             <button 
               onClick={handleAddFunds}
-              className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-all duration-300"
+              disabled={isConnecting}
+              className="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg font-medium transition-all duration-300 flex items-center justify-center space-x-2"
             >
-              Add Funds
+              {isConnecting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Connexion...</span>
+                </>
+              ) : (
+                <>
+                  <span>Add Funds</span>
+                  {!isConnected && <span className="text-xs">(Connect)</span>}
+                </>
+              )}
             </button>
             <button 
               onClick={handleCashOut}
@@ -118,11 +156,20 @@ const WalletPanel = () => {
               Cash Out
             </button>
           </div>
+
+          {/* Multi-Wallet Info */}
+          {!isConnected && (
+            <div className="text-center">
+              <p className="text-gray-400 text-xs">
+                Supporte MetaMask, WalletConnect, Coinbase Wallet et plus
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Customize Section */}
-      <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-4 backdrop-blur-sm">
+      <div className="bg-gray-800/60 border border-gray-700/80 rounded-xl p-4 backdrop-blur-md shadow-2xl">
         <div className="flex items-center space-x-2 mb-4">
           <div className="w-5 h-5 text-purple-500">🎨</div>
           <h3 className="text-white font-semibold">Customize</h3>
@@ -136,7 +183,7 @@ const WalletPanel = () => {
       {/* Add Funds Modal */}
       {showAddFunds && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 border border-gray-700 rounded-xl p-6 max-w-md w-full mx-4">
+          <div className="bg-gray-800/95 border border-gray-700 rounded-xl p-6 max-w-md w-full mx-4 backdrop-blur-md">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-white font-semibold text-lg">Add Funds</h3>
               <button 

@@ -3,6 +3,7 @@ import Header from './Header';
 import Sidebar from './Sidebar';
 import GameArea from './GameArea';
 import WalletPanel from './WalletPanel';
+import SlitherBackground from './SlitherBackground';
 import { mockData } from '../data/mockData';
 
 const HomePage = () => {
@@ -12,22 +13,17 @@ const HomePage = () => {
   const [friends, setFriends] = useState(mockData.friends);
 
   return (
-    <div className="min-h-screen bg-gray-900 relative overflow-hidden">
-      {/* Animated background blobs - matching original design */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Orange/Red blob (left side) */}
-        <div className="absolute top-1/3 left-12 w-40 h-80 bg-gradient-to-br from-orange-500 via-red-500 to-orange-600 rounded-full opacity-70 blur-xl animate-float transform rotate-45"></div>
-        
-        {/* Blue blob (right side) */}
-        <div className="absolute top-1/2 right-16 w-32 h-64 bg-gradient-to-br from-blue-500 via-cyan-500 to-blue-600 rounded-full opacity-60 blur-xl animate-float-delayed transform -rotate-12"></div>
-        
-        {/* Additional teal accents */}
-        <div className="absolute -top-20 -left-20 w-60 h-60 bg-gradient-to-r from-cyan-500/20 to-teal-500/20 rounded-full blur-3xl animate-float-slow"></div>
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-gradient-to-r from-blue-500/15 to-purple-500/15 rounded-full blur-3xl animate-float"></div>
-      </div>
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animation de fond Slither.io */}
+      <SlitherBackground />
+
+      {/* Overlay gradient pour améliorer la lisibilité */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-transparent to-black/40 pointer-events-none z-5"></div>
 
       {/* Header */}
-      <Header />
+      <div className="relative z-20">
+        <Header />
+      </div>
       
       {/* Main content */}
       <div className="relative z-10 container mx-auto px-4 py-8">

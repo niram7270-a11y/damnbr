@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the DamnBruh clone website functionality including visual verification, header functionality, game interface, wallet connection, sidebar functionality, and interactive elements"
+user_problem_statement: "regarde bien mon projet et modifie le seulement au niveau de l'arriere plan pour qu'il y ai cette video en boucle que jai mit ci joint. Enlever le badge 'Made with Emergent' et améliorer la fonctionnalité du bouton Add Funds pour connexion automatique"
 
 frontend:
   - task: "Visual Layout and Design Verification"

